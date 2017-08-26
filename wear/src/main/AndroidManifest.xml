@@ -2,6 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.aroes.msgapileak">
 
+    <uses-permission android:name="android.permission.SEND_SMS"/>
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+
     <uses-feature android:name="android.hardware.type.watch" />
 
     <application

