@@ -1,4 +1,4 @@
-package com.aroes.msgapileak;
+package com.aroes.dataapileak;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
 
-        assertEquals("com.aroes.msgapileak", appContext.getPackageName());
+        assertEquals("com.aroes.dataapileak", appContext.getPackageName());
     }
 }

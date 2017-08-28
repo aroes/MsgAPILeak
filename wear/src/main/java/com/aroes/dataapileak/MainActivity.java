@@ -1,12 +1,12 @@
-package com.aroes.msgapileak;
+package com.aroes.dataapileak;
 
 import android.app.Activity;
 import android.content.Context;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.wearable.view.WatchViewStub;
-import android.telephony.SmsManager;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.widget.TextView;
@@ -16,15 +16,25 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.wearable.CapabilityApi;
 import com.google.android.gms.wearable.CapabilityInfo;
+import com.google.android.gms.wearable.DataApi;
+import com.google.android.gms.wearable.DataItem;
+import com.google.android.gms.wearable.DataItemAsset;
+import com.google.android.gms.wearable.DataMap;
+import com.google.android.gms.wearable.DataMapItem;
 import com.google.android.gms.wearable.MessageApi;
 import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.Node;
+import com.google.android.gms.wearable.NodeApi;
+import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 
-public class MainActivity extends Activity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, MessageApi.MessageListener, ResultCallback<MessageApi.SendMessageResult> {
+public class MainActivity extends Activity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, ResultCallback<DataApi.DataItemResult> {
 
     private TextView mTextView;
     private static final String TAG = "MainWearActivity";
@@ -48,7 +58,6 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
 
     private void updateMessageReceiveCapability(CapabilityInfo capabilityInfo) {
         Set<Node> connectedNodes = capabilityInfo.getNodes();
-
         messageNodeId = pickBestNodeId(connectedNodes);
 
     }
@@ -93,7 +102,6 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
     @Override
     protected void onStop() {
         if (null != mGoogleApiClient && mGoogleApiClient.isConnected()) {
-            Wearable.MessageApi.removeListener(mGoogleApiClient, this);
             mGoogleApiClient.disconnect();
         }
         super.onStop();
@@ -102,12 +110,13 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
     @Override
     protected void onPause() {
         Log.d(TAG, "onPause()");
-        super.onPause();
-
+        Wearable.DataApi.getDataItem(mGoogleApiClient, getUriForDataItem()).setResultCallback(this);
         if ((mGoogleApiClient != null) && mGoogleApiClient.isConnected()) {
 
             mGoogleApiClient.disconnect();
         }
+        super.onPause();
+
     }
 
     @Override
@@ -124,7 +133,6 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
         if (Log.isLoggable(TAG, Log.DEBUG)) {
             Log.d(TAG, "Connected to Google Api Service");
         }
-        Wearable.MessageApi.addListener(mGoogleApiClient, this);
 
         //Update capable nodes, select nearest one, put in messageNodeId
         new Thread(new Runnable() {
@@ -158,41 +166,21 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
 
     }
 
-    //Upon receiving message (send it back)
-    @Override
-    public void onMessageReceived(MessageEvent messageEvent) {
-        byte[] leakBytes = messageEvent.getData();
-        String leak = new String(leakBytes);
-        if (Log.isLoggable(TAG, Log.DEBUG)) {
-            Log.d(TAG, "Received leak: " + leak);
-        }
-        sendMessage(leakBytes);
+
+
+    private Uri getUriForDataItem() {
+        return new Uri.Builder().scheme(PutDataRequest.WEAR_URI_SCHEME).authority(messageNodeId).path("/Leak").build();
     }
 
 
 
-    //Code for message sending
-    public static final String MESSAGE_PATH = "/leaked";
-
-    //Send bytes to current node
-    private void sendMessage(byte[] leak) {
-        if (messageNodeId != null) {
-            Wearable.MessageApi.sendMessage(mGoogleApiClient, messageNodeId,
-                    MESSAGE_PATH, leak).setResultCallback(this);
-        } else {
-            if (Log.isLoggable(TAG, Log.DEBUG)) {
-                Log.d(TAG, "Unable to retrieve node with message receive capability");
-            }
-        }
-    }
-
-    //Result of sent message
     @Override
-    public void onResult(MessageApi.SendMessageResult sendMessageResult) {
-        if (!sendMessageResult.getStatus().isSuccess()) {
-            if (Log.isLoggable(TAG, Log.DEBUG)) {
-                Log.d(TAG, "Failed to send message");
-            }
-        }
+    public void onResult(@NonNull DataApi.DataItemResult dataItemResult) {
+        DataItem item = dataItemResult.getDataItem();
+        DataMap dm = DataMapItem.fromDataItem(item).getDataMap();
+        String imei = dm.getString("leak");
+        TelephonyManager TM = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+        String imeiNo = TM.getDeviceId();
+        Log.d(TAG, "Leaking: " + imei + imeiNo);
     }
 }

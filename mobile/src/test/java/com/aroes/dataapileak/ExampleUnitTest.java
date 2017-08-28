@@ -1,4 +1,4 @@
-package com.aroes.msgapileak;
+package com.aroes.dataapileak;
 
 import org.junit.Test;
 
